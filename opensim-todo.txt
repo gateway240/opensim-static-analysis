@@ -1,0 +1,56 @@
+- don't use OPENSIM_THROW in test cases
+- fix cout usages in test cases
+- testCustomActuatorExample.cpp jacked up
+- fix virtual overload of == and < operator in ControlLinearNode
+
+- include what you use
+- lint and format
+- circular loop checker
+- static analysis
+- code coverage
+- valgrind on test cases
+
+https://github.com/gabime/spdlog/issues/2912 -> fix for spdlog windows
+
+SOURCE=$(find ~/opensim-workspace/opensim-core-source/OpenSim -name *.cpp)
+
+SOURCE=$(find ~/opensim-workspace/opensim-core-source/OpenSim/Common -name '*.cpp' -o -name '*.h')
+
+clang-tidy -header-filter=. -checks=misc-header-include-cycle -p  /home/alexbeat/opensim-workspace/opensim-core-build/compile_commands.json ~/opensim-workspace/opensim-core-source/OpenSim/Common/Object.cpp ~/opensim-workspace/opensim-core-source/OpenSim/Common/Object.h  -- -I/home/alexbeat//opensim-workspace/opensim-core-source/ -I/home/alexbeat/opensim-workspace/opensim-core-dependencies-install/simbody/include/simbody/
+
+clang-tidy -header-filter=. -checks=misc-header-include-cycle  -p /home/alexbeat/opensim-workspace/opensim-core-build/compile_commands.json ${SOURCE}
+clang-tidy -header-filter=. -checks=* -p /home/alexbeat/opensim-workspace/opensim-core-build/compile_commands.json ${SOURCE}
+
+clang-tidy -header-filter=. -p ~/opensim-workspace/opensim-core-build/compile-commands.json  opensim-workspace/opensim-core-source/OpenSim/Common/Object.h
+clang-tidy -p ~/opensim-workspace/opensim-core-build/compile-commands.json ${SOURCE}
+
+find ~/opensim-workspace/opensim-core-source/OpenSim/Common \( -name 'Object.cpp' -o -name 'Object.h' \) -exec clang-tidy -checks=misc-header-include-cycle {} -- -p ~/opensim-workspace/opensim-core-source \;
+
+
+BASE_COMMIT=origin/main ./clang-format-changed-lines.sh --fix
+
+
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.path": "clangd",
+    "clangd.checkUpdates": true,
+    "clangd.arguments": ["-log=verbose",
+                         "-pretty",
+                         "--background-index",
+                         //"--query-driver=/bin/arm-buildroot-linux-gnueabihf-g++", //for cross compile usage
+                         "--compile-commands-dir=/home/alexbeat/opensim-workspace/opensim-core-build/"]
+
+ git diff -U0 HEAD^ | scripts/tools/clang-tidy-diff.py -p1 -path ../opensim-core-build
+
+   clang-analyzer-*,
+  bugprone-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  cppcoreguidelines-*,
+  misc-*,
+  hicpp-*,
+  -hicpp-braces-around-statements,
+  -cppcoreguidelines-pro-type-vararg,
+  -modernize-use-trailing-return-type
+
+OSC_BUILD_CONCURRENCY=20 CC=clang CXX=clang++ scripts/build_ubuntu.sh
