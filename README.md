@@ -1,0 +1,1 @@
+# opensim-static-analysis
