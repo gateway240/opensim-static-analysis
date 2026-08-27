@@ -97,23 +97,33 @@ cd "$OPEN_SIM_BASE" || {
   echo "Error: Failed to cd into $OPEN_SIM_BASE"
   exit 1
 }
-
+# Use the .clang-format from the directory where the script was invoked.
+STYLE_FILE="$ORIG_DIR/.clang-format"
 # Run git-clang-format with logging (from OpenSim base dir)
-"$GIT_CLANG_FORMAT" "$BASE_REF" --diff | tee -a "$ORIG_DIR/$LOG_FILE"
+FORMAT_CMD=(
+  "$GIT_CLANG_FORMAT"
+  "$BASE_REF"
+  "--style=file:$STYLE_FILE"
+)
+
+"${FORMAT_CMD[@]}" --diff | tee -a "$ORIG_DIR/$LOG_FILE"
 rc1=${PIPESTATUS[0]}
 
-"$GIT_CLANG_FORMAT" "$BASE_REF" --diffstat | tee -a "$ORIG_DIR/$LOG_FILE"
+"${FORMAT_CMD[@]}" --diffstat | tee -a "$ORIG_DIR/$LOG_FILE"
 rc2=${PIPESTATUS[0]}
 
 # Combine exit codes
-FORMAT_ERROR=$(( rc1 || rc2 ))
+FORMAT_ERROR=$((rc1 || rc2))
 
 # If --fix is specified and formatting issues exist, apply the fix
 if [ "$FORMAT_ERROR" -ne 0 ] && [ "$FIX" -eq 1 ]; then
   echo | tee -a "$ORIG_DIR/$LOG_FILE"
   echo "Applying automatic formatting fixes..." | tee -a "$ORIG_DIR/$LOG_FILE"
-  "$GIT_CLANG_FORMAT" "$BASE_REF" | tee -a "$ORIG_DIR/$LOG_FILE"
-  echo "Fixes applied. Please review and re-commit your changes." | tee -a "$ORIG_DIR/$LOG_FILE"
+
+  "${FORMAT_CMD[@]}" | tee -a "$ORIG_DIR/$LOG_FILE"
+
+  echo "Fixes applied. Please review and re-commit your changes." \
+    | tee -a "$ORIG_DIR/$LOG_FILE"
 fi
 
 
