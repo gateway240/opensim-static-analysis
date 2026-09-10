@@ -18,7 +18,7 @@ AlignConsecutiveDeclarations: false
 AlignEscapedNewlines: Right
 AlignOperands:   true
 AlignTrailingComments: true
-AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: true 
 AllowShortCaseLabelsOnASingleLine: true 
 AllowShortFunctionsOnASingleLine: All
@@ -76,13 +76,17 @@ IncludeCategories:
   - Regex: '^"'
     Priority: 2
 
+  # Project's own headers
+  - Regex: '^<(OpenSim)/'
+    Priority: 3
+
   # Third-party headers
   - Regex: '^<(SimTKcommon|simbody)/'
-    Priority: 3
+    Priority: 4
 
   # Standard library
   - Regex: '^<'
-    Priority: 4
+    Priority: 5
 IncludeIsMainRegex: '(Test)?$'
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash
